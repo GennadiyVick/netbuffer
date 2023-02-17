@@ -4,48 +4,43 @@ import socket
 import ssl
 import select
 import os
+import struct as st
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread
 from datetime import datetime
 from config import CACHE_DIR
-hdrsize = 10
+hdrsize = 11
 bufsize = 2048
 accepttimeout = 5
 readtimeout = 3
 maxclients = 10
+signatura = b'ncb'
 
 class DataHeader:
     # filetypes: 0 - None, 1 - image, 2 - text, 3 - file
     def __init__(self, addr):
+        #Заголовок
         self.filesize = 0
         self.filetype = 0
         self.addr = addr
-        self.filename = ''
         self.fnlen = 0
+        #Имя файла это часть контента, не заголовка, т.к. нет фиксированной длины строки
+        self.filename = ''
 
     def read(self, data):
         l = len(data)
         if l < hdrsize: return False
-        if ((data[0] == 110) & (data[1] == 99) & (data[2] == 98)):
-            self.filesize = int.from_bytes(data[3:7],'big')
-            self.filetype = int.from_bytes(data[7:9],'little')
-            self.fnlen = int.from_bytes(data[9:10],'little')
-            #print('read fnlen',self.fnlen)
-            #self.ext =data[9:12].decode()
+        if data[:3] == signatura:
+            self.filesize, self.filetype, self.fnlen = st.unpack('IBH', data[3:])
             return True
         else:
             return False
 
     def toBytes(self):
-        if len(self.filename)>0:
-            fn = self.filename.encode('utf-8')
-            self.fnlen = len(fn)
-        else:
-            fn = b''
-            self.hdr.fnlen = 0
-        buf = b'ncb'
-        buf += self.filesize.to_bytes(4,'big') + self.filetype.to_bytes(2,'little') + self.fnlen.to_bytes(1,'little')+fn
-        return buf
+        fn = self.filename.encode('utf-8')
+        self.fnlen = len(fn)
+        return signatura + st.pack('IBH', self.filesize, self.filetype, self.fnlen)+fn
+
 
 class StreamServer(QtCore.QObject):
     onFinish = QtCore.pyqtSignal(str)
@@ -76,7 +71,6 @@ class StreamServer(QtCore.QObject):
                 self.thread = None
 
     def newThread(self,client,addr):
-
         if self.sslcontext != None:
             try:
                 sock = self.sslcontext.wrap_socket(client, server_side=True)
@@ -137,6 +131,7 @@ class StreamServer(QtCore.QObject):
                     self.newThread(client,addr)
 
         self.sock.close()
+        print('server stoped')
         if (len(self.childlist) == 0):
             self.onFinish.emit('')
             self.thread.quit()
@@ -289,7 +284,6 @@ class Sender(QtCore.QObject):
         if self.ssl:
             sock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_SSLv23, ciphers="ADH-AES256-SHA")
 
-        buf = self.hdr.toBytes()
         try:
 
             sock.connect(self.ipport)
@@ -309,6 +303,7 @@ class Sender(QtCore.QObject):
         #    print('sended ok')
         self.thread.quit()
         self.thread = None
+
 
 class SenderFile(QtCore.QObject):
     onError = QtCore.pyqtSignal(str)
@@ -338,16 +333,14 @@ class SenderFile(QtCore.QObject):
             return
 
         self.hdr.filename = os.path.basename(self.hdr.filename)
-        fn = self.hdr.filename.encode('utf-8')
-        self.hdr.fnlen = len(fn)
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
 
         if self.ssl:
             sock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_SSLv23, ciphers="ADH-AES256-SHA")
-        buf = b'ncb'
-        buf += self.hdr.filesize.to_bytes(4,'big') + self.hdr.filetype.to_bytes(2,'little') + self.hdr.fnlen.to_bytes(1,'little')+fn
+
+        buf = self.hdr.toBytes()
         #buf += self.hdr.filesize.to_bytes(4,'big') + self.hdr.filetype.to_bytes(2,'little') + str.encode(self.hdr.ext)
 
         try:
@@ -369,7 +362,7 @@ class SenderFile(QtCore.QObject):
             self.onError.emit(f'error connect to: {self.ipport} {str(e)}')
             self.closethread()
             return
-
+        readed = 0
         while True:
             r = 0
             try:
@@ -378,6 +371,7 @@ class SenderFile(QtCore.QObject):
             except:
                 break
             if r > 0:
+                readed += r
                 sock.sendall(data)
             else:
                 break

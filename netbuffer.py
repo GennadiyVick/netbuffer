@@ -222,7 +222,6 @@ class MainWindow(QMainWindow):
     def getMimeData(self,cb,md):
         f = 'PNG'
         formats = md.formats()
-        print(formats)
         if ('image/png' in formats) or ('application/x-qt-image' in formats):
             self.hdr.filename = 'image.png'
         else:
@@ -304,6 +303,7 @@ class MainWindow(QMainWindow):
         self.hide()
 
     def sendError(self, msg):
+        print(msg)
         msg = MessagePopup(msg)
         msg.show()
 
