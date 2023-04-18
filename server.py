@@ -288,7 +288,7 @@ class Sender(QtCore.QObject):
 
             sock.connect(self.ipport)
             sock.settimeout(None)
-            sock.sendall(buf)
+            sock.sendall(self.hdr.toBytes())
             sock.sendall(self.data)
             sock.close()
         except socket.timeout:
