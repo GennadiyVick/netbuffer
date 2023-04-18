@@ -12,8 +12,9 @@ window opposite the field "Where" there is a button "..." everything is intuitiv
 
 When data arrives on the socket, the data type is passed in the header.
 The data is automatically transferred to the buffer if the following conditions are met:
-* the ip address from which the data came is in the white list (see settings)
-* if the corresponding option is enabled in the settings.
+- the ip address from which the data came is in the white list (see settings)
+- if the corresponding option is enabled in the settings.  
+
 in all other cases a pop-up window opens
 at the bottom and right of the screen, which displays the content text, picture
 and buttons copy, save to file, cancel and block ip addresses,
@@ -44,7 +45,7 @@ pythonw program_path\netbuffer.py
 or create a shortcut and specify this command.
 After launch, the program icon should appear in the tray.
 
-###Linux:
+### Linux:
 on linux OS `python3` should already be pre-installed check with command
 ```console
 python3 --version
