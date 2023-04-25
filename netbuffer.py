@@ -151,6 +151,7 @@ class MainWindow(QMainWindow):
             self.app.quit()
 
     def closeEvent(self,event):
+        #super().closeEvent(event)
         print('close event')
 
     def getext(self, fn):
@@ -188,6 +189,7 @@ class MainWindow(QMainWindow):
             self.hdr.filetype = 2
             self.hdr.filename = 'document.txt'
             self.ui.label1.setText('В буфере обмена сейчас текст:')
+
             self.ui.lClipboard.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
             self.ui.lClipboard.setText(cb.text())
             res = True
@@ -196,16 +198,15 @@ class MainWindow(QMainWindow):
             self.ui.lClipboard.setText('')
         return res
 
-    def doSend(self, checkclipboard=True):
-        if checkclipboard:
-            self.clipboardcheck()
+    def doSend(self):
+        self.clipboardcheck()
         self.show()
 
     def sendclipboard(self):
         if self.clipboardcheck():
             self.sendFromClipboard()
         else:
-            self.doSend(False)
+            self.show()
 
     def senddata(self, hdr,data,ip, port):
         ''' отправляем потоком QThread
