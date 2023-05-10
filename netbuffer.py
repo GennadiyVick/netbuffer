@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
         for i in range(itemscount):
             set.setArrayIndex(i)
             ip = set.value('ip','')
-            port = int(set.value("port",5305))
+            port = int(set.value("port", 5305))
             name = set.value('name','')
             if len(ip) > 2:
                 self.connections.append({'ip':ip,'port':port, 'name': name})
@@ -387,17 +387,6 @@ class MainWindow(QMainWindow):
 
             set.endArray()
             set.sync()
-
-'''        self.connections = []
-        for i in range(itemscount):
-            set.setArrayIndex(i)
-            ip = set.value('ip','')
-            port = set.value("port",5305)
-            name = set.value('name','')
-            if len(ip) > 2:
-                self.connections.append({'ip':ip,'port':port, 'name': name})
-                self.ui.cbIp.addItem(name+' ['+ip+']')
-        set.endArray() '''
 
 
 def main():
