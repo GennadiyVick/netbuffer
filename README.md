@@ -4,16 +4,16 @@ Select Language: **English**, [Russian](https://github.com/GennadiyVick/NetBuffe
 Network clipboard program uses tcp/ip stack as base protocol
 You can copy at a time: text, picture or 1 file, copy several
 files are not currently supported.
-How it works: you copy text, picture or file to the clipboard, then
+How it works: you copy text, picture or a file to the clipboard, then
 right mouse button on the program shortcut in the tray calls the context menu or
 the left mouse button immediately sends the contents of the buffer to the selected host.
-Hosts can be added by clicking send in the context menu in the opened
-window opposite the field "Where" there is a button "..." everything is intuitively clear there.
+Hosts can be added by clicking send in the context menu, in the opened
+window opposite the field "IP address or host" there is a button "..." everything is intuitively clear there.
 
 When data arrives on the socket, the data type is passed in the header.
-The data is automatically transferred to the buffer if the following conditions are met:
-- the ip address from which the data came is in the white list (see settings)
-- if the corresponding option is enabled in the settings.  
+The data is automatically transferred to the clipboard if the following conditions are met:
+1 - the ip address from which the data came is in the white list (see settings)
+2 - if the corresponding option is enabled in the settings.  
 
 in all other cases a pop-up window opens
 at the bottom and right of the screen, which displays the content text, picture
@@ -52,7 +52,7 @@ python3 --version
 ```
 and you also need to install the `PyQt5` library with the command:
 ```console
-pip3 install pyqt5
+sudo apt install python3-pyqt5
 ```
 now you can run the program with the command
 ```console
