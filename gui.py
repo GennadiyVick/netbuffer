@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from mylabel import MyLabel
 
 
 class Ui_MainForm(object):
-    def setupUi(self, MainForm):
+    def setupUi(self, MainForm, lang):
         MainForm.setObjectName("MainForm")
         MainForm.resize(395, 346)
         MainForm.setMaximumSize(QtCore.QSize(500, 400))
         MainForm.setAcceptDrops(True)
         self.centralwidget = QtWidgets.QWidget(MainForm)
         self.centralwidget.setObjectName("centralwidget")
-        #self.centralwidget.setStyleSheet('QWidget#centralwidget {background: #222; font-color: #eee;}')
+        # self.centralwidget.setStyleSheet('QWidget#centralwidget {background: #222; font-color: #eee;}')
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
@@ -24,7 +24,6 @@ class Ui_MainForm(object):
         self.lInfo.setWordWrap(True)
         self.lInfo.setObjectName("lInfo")
         self.verticalLayout.addWidget(self.lInfo)
-
 
         self.ipwidget = QtWidgets.QWidget(self.centralwidget)
         self.ipwidget.setMinimumSize(QtCore.QSize(0, 30))
@@ -39,8 +38,8 @@ class Ui_MainForm(object):
         self.label2.setObjectName("label2")
         self.horizontalLayout_2.addWidget(self.label2)
 
-        #self.eip = QtWidgets.QLineEdit(self.ipwidget)
-        #self.eip.setObjectName("eip")
+        # self.eip = QtWidgets.QLineEdit(self.ipwidget)
+        # self.eip.setObjectName("eip")
         self.cbIp = QtWidgets.QComboBox(self.ipwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(1)
@@ -51,7 +50,7 @@ class Ui_MainForm(object):
         self.cbIp.setMaxCount(100)
         self.cbIp.setObjectName("cbIp")
         self.horizontalLayout_2.addWidget(self.cbIp)
-        #self.horizontalLayout_2.addWidget(self.eip)
+        # self.horizontalLayout_2.addWidget(self.eip)
         self.bAddrEdit = QtWidgets.QToolButton(self.ipwidget)
         self.bAddrEdit.setMinimumSize(QtCore.QSize(32, 32))
         self.bAddrEdit.setMaximumSize(QtCore.QSize(32, 32))
@@ -88,13 +87,11 @@ class Ui_MainForm(object):
         self.lClipboard = MyLabel(self.cbwidget)
         self.lClipboard.setWordWrap(True)
 
-
-        self.lClipboard.setStyleSheet("QLabel{\n"
-"    color: #eee;\n"
-"    border-style: outset;\n"
-"    border-width: 1px;\n"
-"    border-color: #1b1b1b;\n"
-"}")
+        self.lClipboard.setStyleSheet("QLabel{color: #eee;\n"
+                                      "    border-style: outset;\n"
+                                      "    border-width: 1px;\n"
+                                      "    border-color: #1b1b1b;\n"
+                                      "}")
         self.lClipboard.setText("")
         self.lClipboard.setObjectName("lClipboard")
         self.verticalLayout_2.addWidget(self.lClipboard)
@@ -115,16 +112,15 @@ class Ui_MainForm(object):
         self.horizontalLayout.addWidget(self.bCancel)
         self.verticalLayout.addWidget(self.bwidget)
 
-        self.retranslateUi(MainForm)
+        self.retranslateUi(MainForm, lang)
         QtCore.QMetaObject.connectSlotsByName(MainForm)
 
-    def retranslateUi(self, MainForm):
-        _translate = QtCore.QCoreApplication.translate
-        MainForm.setWindowTitle(_translate("MainForm", "Сетевой буфер"))
-        self.lInfo.setText(_translate("MainForm", "Перетащи файл на форму или жми отправить файл"))
-        self.label2.setText(_translate("MainForm", "Куда (IP/hostname):"))
-        self.label1.setText(_translate("MainForm", "в буфере обмена сейчас:"))
-        self.bSend.setText(_translate("MainForm", "Отправить из буфера"))
-        self.bSendFile.setText(_translate("MainForm", "Отправить файл"))
-        self.bCancel.setText(_translate("MainForm", "Отмена"))
+    def retranslateUi(self, MainForm, lang):
+        MainForm.setWindowTitle(lang.tr("netbuffer"))
+        self.lInfo.setText(lang.tr("dragandsend"))
+        self.label2.setText(lang.tr("hostname"))
+        self.label1.setText(lang.tr("onclipboardnow"))
+        self.bSend.setText(lang.tr("sendfromclipboard"))
+        self.bSendFile.setText(lang.tr("sendfile"))
+        self.bCancel.setText(lang.tr("cancel"))
         self.bAddrEdit.setText("...")

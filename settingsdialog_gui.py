@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_SettingsDialog(object):
-    def setupUi(self, Dialog):
+    def setupUi(self, Dialog, lang):
         Dialog.setObjectName("Dialog")
         Dialog.resize(415, 433)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
@@ -112,23 +112,22 @@ class Ui_SettingsDialog(object):
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
 
-        self.retranslateUi(Dialog)
+        self.retranslateUi(Dialog, lang)
         self.buttonBox.accepted.connect(Dialog.accept) # type: ignore
         self.buttonBox.rejected.connect(Dialog.reject) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.l_whitelist.setText(_translate("Dialog", "Белый список IP:"))
-        self.l_blacklist.setText(_translate("Dialog", "Чёрый список IP:"))
-        self.l_blacklist_info.setText(_translate("Dialog", "блокирует соединения"))
-        self.cb_onlywhitelist.setText(_translate("Dialog", "Разрешать соединения только из белого списка"))
-        self.gb_autotoclipboard.setTitle(_translate("Dialog", "Автоперенос данных  в буфер (для белого списка)"))
-        self.cb_textimage.setText(_translate("Dialog", "Текст и изображения"))
-        self.cb_files.setText(_translate("Dialog", "Файлы"))
-        self.cb_ssl.setText(_translate("Dialog", "Использовать SSL соединение"))
-        self.lCert.setText(_translate("Dialog", "Сертификат:"))
-        self.bCert.setText(_translate("Dialog", "Обзор"))
-        self.lKey.setText(_translate("Dialog", "Ключ:"))
-        self.bCert_2.setText(_translate("Dialog", "Обзор"))
+    def retranslateUi(self, Dialog, lang):
+        Dialog.setWindowTitle(lang.tr("settings"))
+        self.l_whitelist.setText(lang.tr("whitelist"))
+        self.l_blacklist.setText(lang.tr("blacklist"))
+        self.l_blacklist_info.setText(lang.tr("block"))
+        self.cb_onlywhitelist.setText(lang.tr("allowconnections"))
+        self.gb_autotoclipboard.setTitle(lang.tr("automatictransfer"))
+        self.cb_textimage.setText(lang.tr("textandimages"))
+        self.cb_files.setText(lang.tr("files"))
+        self.cb_ssl.setText(lang.tr("usessl"))
+        self.lCert.setText(lang.tr("certificate"))
+        self.bCert.setText(lang.tr("browse"))
+        self.lKey.setText(lang.tr("key"))
+        self.bCert_2.setText(lang.tr("browse"))

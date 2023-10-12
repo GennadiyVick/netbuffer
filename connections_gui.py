@@ -1,12 +1,14 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import images
 
+
 class MyLabel(QtWidgets.QLabel):
     clicked = QtCore.pyqtSignal()
 
     def mousePressEvent(self, event):
         if event.buttons() == QtCore.Qt.LeftButton:
             self.clicked.emit()
+
 
 class Ui_ConnectionsDialog(object):
     def setupUi(self, Dialog):
@@ -22,8 +24,8 @@ class Ui_ConnectionsDialog(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.tv = QtWidgets.QTableView(self.widget)
         self.tv.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        #self.tv.setStyleSheet("background: #333;")
-        #self.tv.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        # self.tv.setStyleSheet("background: #333;")
+        # self.tv.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tv.horizontalHeader().setStretchLastSection(True)
         self.tv.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tv.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -43,7 +45,9 @@ class Ui_ConnectionsDialog(object):
         self.bAdd.setObjectName("bAdd")
         self.bAdd.setPixmap(QtGui.QPixmap(':/add.png'))
         self.bAdd.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        self.bAdd.setStyleSheet('QLabel:hover {background: #40000000; border-style: inset; border-width: 1px; border-color: #a0404050;  border-radius: 4px;}')
+        self.bAdd.setStyleSheet(
+            'QLabel:hover {background: #40000000; border-style: inset; border-width: 1px; border-color: #a0404050;  '
+            'border-radius: 4px;}')
         self.verticalLayout_2.addWidget(self.bAdd)
         self.bDel = MyLabel(self.widget_2)
         self.bDel.setMinimumSize(QtCore.QSize(40, 40))
@@ -51,7 +55,9 @@ class Ui_ConnectionsDialog(object):
         self.bDel.setObjectName("bDel")
         self.bDel.setPixmap(QtGui.QPixmap(':/delete.png'))
         self.bDel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        self.bDel.setStyleSheet('QLabel:hover {background: #40000000; border-style: inset; border-width: 1px; border-color: #a0404050;  border-radius: 4px;}')
+        self.bDel.setStyleSheet(
+            'QLabel:hover {background: #40000000; border-style: inset; border-width: 1px; border-color: #a0404050;  '
+            'border-radius: 4px;}')
         self.verticalLayout_2.addWidget(self.bDel)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
@@ -59,15 +65,10 @@ class Ui_ConnectionsDialog(object):
         self.verticalLayout.addWidget(self.widget)
         self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
 
-
-        self.buttonBox.accepted.connect(Dialog.accept) # type: ignore
-        self.buttonBox.rejected.connect(Dialog.reject) # type: ignore
+        self.buttonBox.accepted.connect(Dialog.accept)  # type: ignore
+        self.buttonBox.rejected.connect(Dialog.reject)  # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Dialog)
-
-
-
-

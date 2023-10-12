@@ -1,4 +1,3 @@
-from threading import Thread
 import time
 import socket
 import ssl
@@ -9,6 +8,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread
 from datetime import datetime
 from config import CACHE_DIR
+
 hdrsize = 11
 bufsize = 2048
 accepttimeout = 5
@@ -16,15 +16,16 @@ readtimeout = 3
 maxclients = 10
 signatura = b'ncb'
 
+
 class DataHeader:
     # filetypes: 0 - None, 1 - image, 2 - text, 3 - file
     def __init__(self, addr):
-        #Заголовок
+        # Заголовок
         self.filesize = 0
         self.filetype = 0
         self.addr = addr
         self.fnlen = 0
-        #Имя файла это часть контента, не заголовка, т.к. нет фиксированной длины строки
+        # Имя файла это часть контента, не заголовка, т.к. нет фиксированной длины строки
         self.filename = ''
 
     def read(self, data):
@@ -39,7 +40,7 @@ class DataHeader:
     def toBytes(self):
         fn = self.filename.encode('utf-8')
         self.fnlen = len(fn)
-        return signatura + st.pack('IBH', self.filesize, self.filetype, self.fnlen)+fn
+        return signatura + st.pack('IBH', self.filesize, self.filetype, self.fnlen) + fn
 
 
 class StreamServer(QtCore.QObject):
@@ -48,6 +49,7 @@ class StreamServer(QtCore.QObject):
 
     def __init__(self, thread, sets):
         super().__init__()
+        self.sock = None
         self.sets = sets
         self.keep_running = False
         self.thread = thread
@@ -66,12 +68,12 @@ class StreamServer(QtCore.QObject):
         self.childlist.remove(receiver)
         if (not self.keep_running) and (len(self.childlist) == 0):
             self.onFinish.emit('')
-            if (self.thread != None):
+            if self.thread is not None:
                 self.thread.quit()
                 self.thread = None
 
-    def newThread(self,client,addr):
-        if self.sslcontext != None:
+    def newThread(self, client, addr):
+        if self.sslcontext is not None:
             try:
                 sock = self.sslcontext.wrap_socket(client, server_side=True)
             except Exception as e:
@@ -81,14 +83,13 @@ class StreamServer(QtCore.QObject):
         else:
             sock = client
         thread = QThread()
-        receiver = Receiver(thread,sock, addr,self.onRead)
+        receiver = Receiver(thread, sock, addr, self.onRead)
         receiver.onFinish.connect(self.childFinish)
-        #receiver.onRead.connect(self.childread)
+        # receiver.onRead.connect(self.childread)
         receiver.moveToThread(thread)
         thread.started.connect(receiver.run)
         self.childlist.append(receiver)
         thread.start()
-
 
     def run(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,15 +97,15 @@ class StreamServer(QtCore.QObject):
         try:
             self.sock.bind(self.ipport)
         except socket.error:
-            print('can not open port',self.ipport)
+            print('can not open port', self.ipport)
             self.onFinish.emit('Ошибка открытия порта, возможно он уже занят')
             self.thread.quit()
             self.thread = None
             return
         except Exception as e:
-            print('error',e)
+            print('error', e)
         else:
-            print('server listening:',self.ipport)
+            print('server listening:', self.ipport)
         self.sock.listen(maxclients)
         self.keep_running = True
         while self.keep_running:
@@ -112,13 +113,13 @@ class StreamServer(QtCore.QObject):
                 client, addr = self.sock.accept()
             except socket.timeout:
                 time.sleep(0.5)
-                #print('sleep')
+                # print('sleep')
             except socket.error as err:
                 self.onFinish.emit(f'error accept: {err}')
                 self.keep_running = False
-                break;
+                break
             except Exception as e:
-                print('error acception',e)
+                print('error acception', e)
             else:
                 if addr[0] in self.sets.blacklist:
                     print(f'client not accepted, because ip {addr[0]} in blacklist')
@@ -127,19 +128,21 @@ class StreamServer(QtCore.QObject):
                     print(f'client not accepted, because ip {addr[0]} not in whitelist')
                     client.close()
                 else:
-                    print('client accepted:',addr)
-                    self.newThread(client,addr)
+                    print('client accepted:', addr)
+                    self.newThread(client, addr)
 
         self.sock.close()
         print('server stoped')
-        if (len(self.childlist) == 0):
+        if len(self.childlist) == 0:
             self.onFinish.emit('')
             self.thread.quit()
             self.thread = None
 
+
 class Receiver(QtCore.QObject):
     onFinish = QtCore.pyqtSignal(QtCore.QObject)
-    #onRead = QtCore.pyqtSignal(DataHeader)
+
+    # onRead = QtCore.pyqtSignal(DataHeader)
 
     def __init__(self, thread, sock, addr, onRead):
         super().__init__()
@@ -151,18 +154,17 @@ class Receiver(QtCore.QObject):
         self.thread = thread
         self.onRead = onRead
 
-
     def stop(self):
         self.keep_running = False
 
-    def read(self,bs):
+    def read(self, bs):
         try:
             data = self.sock.recv(bs)
         except socket.timeout:
-            return None,2
+            return None, 2
         except socket.error as err:
             print(f'error read: {err}')
-            return None,0
+            return None, 0
         else:
             return data, 1
 
@@ -180,11 +182,11 @@ class Receiver(QtCore.QObject):
         self.keep_running = True
         f = None
         while self.keep_running:
-            if hdr == None:
+            if hdr is None:
                 data, state = self.read(hdrsize)
                 if state == 2:
                     time.sleep(0.5)
-                    sleepcount+=1
+                    sleepcount += 1
                     if sleepcount > 5:
                         break
                     else:
@@ -193,10 +195,10 @@ class Receiver(QtCore.QObject):
                     break
                 hdr = DataHeader(self.addr)
                 hdr.filename = None
-                if (not hdr.read(data)):
+                if not hdr.read(data):
                     hdr = None
                     break
-                if  (hdr.filesize == 0):
+                if hdr.filesize == 0:
                     hdr = None
                     break
                 if hdr.fnlen == 0:
@@ -206,18 +208,18 @@ class Receiver(QtCore.QObject):
                     state = self.readfilename(hdr)
                     if state == 2:
                         time.sleep(0.5)
-                        sleepcount+=1
+                        sleepcount += 1
                         if sleepcount > 5:
                             break
                         else:
                             continue
                     elif state == 0:
                         break
-            elif hdr.filename == None:
+            elif hdr.filename is None:
                 state = self.readfilename(hdr)
                 if state == 2:
                     time.sleep(0.5)
-                    sleepcount+=1
+                    sleepcount += 1
                     if sleepcount > 5:
                         break
                     else:
@@ -225,10 +227,9 @@ class Receiver(QtCore.QObject):
                 elif state == 0:
                     break
 
-
             fls = hdr.filesize
-            if f == None:
-                f = open(os.path.join(CACHE_DIR, hdr.filename),'wb')
+            if f is None:
+                f = open(os.path.join(CACHE_DIR, hdr.filename), 'wb')
             data, state = self.read(2048)
             if state == 2:
                 time.sleep(0.5)
@@ -237,7 +238,7 @@ class Receiver(QtCore.QObject):
                 f.close()
                 break
             recvsize += len(data)
-            while (len(data)>0):
+            while (len(data) > 0):
                 f.write(data)
                 if (recvsize >= hdr.filesize):
                     break
@@ -245,26 +246,21 @@ class Receiver(QtCore.QObject):
                 recvsize += len(data)
                 if state != 1:
                     self.keep_running = False
-                    break;
-
-                #if (recvsize >= hdr.filesize):
-                #    f.write(data)
-                #    break
+                    break
             f.close()
             break
         self.sock.close()
-        if (hdr != None):
+        if hdr is not None:
             self.onRead.emit(hdr)
         self.onFinish.emit(self)
         self.thread.quit()
         self.thread = None
 
 
-
-
 class Sender(QtCore.QObject):
     onError = QtCore.pyqtSignal(str)
-    def __init__(self,hdr,data,ipport,thread, ssl=False):
+
+    def __init__(self, hdr, data, ipport, thread, ssl=False):
         super().__init__()
         self.hdr = hdr
         self.data = data
@@ -274,7 +270,7 @@ class Sender(QtCore.QObject):
 
     def run(self):
         # This will run when you call .start method
-        if (self.hdr.filesize < 3):
+        if self.hdr.filesize < 3:
             print('Sender.run: filesize < 3')
             return
 
@@ -299,7 +295,7 @@ class Sender(QtCore.QObject):
             self.onError.emit(f'error connect to: {self.ipport}')
         except Exception as e:
             print('Sender exception: %s' % e)
-        #else:
+        # else:
         #    print('sended ok')
         self.thread.quit()
         self.thread = None
@@ -307,7 +303,8 @@ class Sender(QtCore.QObject):
 
 class SenderFile(QtCore.QObject):
     onError = QtCore.pyqtSignal(str)
-    def __init__(self,hdr,ipport,thread,ssl=False):
+
+    def __init__(self, hdr, ipport, thread, ssl=False):
         super().__init__()
         self.hdr = hdr
         self.ipport = ipport
@@ -320,7 +317,7 @@ class SenderFile(QtCore.QObject):
 
     def run(self):
         if not os.path.isfile(self.hdr.filename):
-            print('SenderFile run error no such file: ',self.hdr.filename)
+            print('SenderFile run error no such file: ', self.hdr.filename)
             self.closethread()
             return
         self.hdr.filesize = os.path.getsize(self.hdr.filename)
@@ -341,7 +338,7 @@ class SenderFile(QtCore.QObject):
             sock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_SSLv23, ciphers="ADH-AES256-SHA")
 
         buf = self.hdr.toBytes()
-        #buf += self.hdr.filesize.to_bytes(4,'big') + self.hdr.filetype.to_bytes(2,'little') + str.encode(self.hdr.ext)
+        # buf += self.hdr.filesize.to_bytes(4,'big') + self.hdr.filetype.to_bytes(2,'little') + str.encode(self.hdr.ext)
 
         try:
             sock.connect(self.ipport)
@@ -379,6 +376,7 @@ class SenderFile(QtCore.QObject):
         sock.close()
         self.closethread()
 
+
 '''
 import socket
 import ssl
@@ -402,5 +400,3 @@ print wrappedSocket.recv(1280)
 # CLOSE SOCKET CONNECTION
 wrappedSocket.close()
 '''
-
-

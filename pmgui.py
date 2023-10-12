@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_popupmsgform(object):
     def setupUi(self, popupmsgform):
         popupmsgform.setObjectName("popupmsgform")

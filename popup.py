@@ -1,33 +1,33 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QApplication, QSizePolicy, QFileDialog
-from PyQt5.QtCore import QSize, QRect, Qt, QPropertyAnimation, QTimer, QObject, pyqtProperty
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QSizePolicy, QFileDialog
+from PyQt5.QtCore import QRect, Qt, QPropertyAnimation, QTimer, pyqtProperty
 from PyQt5.QtGui import QPainter, QBrush, QColor, QPixmap, QGuiApplication
-from server import DataHeader
 from popupgui import Ui_NotifyDialog
 from shutil import copyfile
-from pathlib import Path
 import subprocess
-import tempfile
 import os
 from config import CACHE_DIR
-#https://evileg.com/en/post/146/
+
+
 class PopupWidget(QtWidgets.QWidget):
-    ''' show text or image when buffer received '''
+    """ show text or image when buffer received """
+
     @pyqtProperty(float)
     def popupOpacity(self):
-        return self._popupOpacity;
+        return self._popupOpacity
 
     @popupOpacity.setter
     def popupOpacity(self, opacity):
         self._popupOpacity = opacity
         self.setWindowOpacity(opacity)
 
-    def __init__(self, hdr, sets,  onPopupResult):
+    def __init__(self, hdr, sets, lang, onPopupResult=None):
         super(PopupWidget, self).__init__()
         self._popupOpacity = 0
+        self.lang = lang
         self.ui = Ui_NotifyDialog()
-        self.ui.setupUi(self)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool |  Qt.WindowStaysOnTopHint)
+        self.ui.setupUi(self, lang)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.animation = QPropertyAnimation()
@@ -43,9 +43,9 @@ class PopupWidget(QtWidgets.QWidget):
         self.hdr = hdr
         self.sets = sets
         fs = round(hdr.filesize / 1024, 2)
-        self.ui.lInfo.setText(f'Отправленно от {hdr.addr[0]}\nФайл: {hdr.filename}\nРазмер файла: {fs} Kb.')
+        self.ui.lInfo.setText(self.lang.tr('retrivedfrom').format(hdr.addr[0], hdr.filename, fs))
         if hdr.filetype == 2:
-            with open(os.path.join(CACHE_DIR, hdr.filename),'r', encoding = 'utf-8') as f:
+            with open(os.path.join(CACHE_DIR, hdr.filename), 'r', encoding='utf-8') as f:
                 self.ui.label.setText(f.read())
         elif hdr.filetype == 1:
             self.ui.label.setText('')
@@ -77,17 +77,16 @@ class PopupWidget(QtWidgets.QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fn = os.path.join(CACHE_DIR, self.hdr.filename)
-        fn,_ = QFileDialog.getSaveFileName(self,'Сохранить как...',fn,options=options)
+        fn, _ = QFileDialog.getSaveFileName(self, self.lang.tr('saveas'), fn, options=options)
         self.timer.start(400)
         if len(fn) > 0:
             copyfile(os.path.join(CACHE_DIR, self.hdr.filename), fn)
 
-
     def openfile(self):
         self.timer.stop()
-        #fn = os.path.join(tempfile.gettempdir(), self.hdr.filename)
-        #fn = Path(os.path.realpath(__file__)).parent / self.hdr.filename
-        #copyfile(os.path.join(CACHE_DIR, self.hdr.filename), fn)
+        # fn = os.path.join(tempfile.gettempdir(), self.hdr.filename)
+        # fn = Path(os.path.realpath(__file__)).parent / self.hdr.filename
+        # copyfile(os.path.join(CACHE_DIR, self.hdr.filename), fn)
         fn = os.path.join(CACHE_DIR, self.hdr.filename)
 
         if os.name == 'nt':
@@ -105,56 +104,54 @@ class PopupWidget(QtWidgets.QWidget):
         self.sets.save()
         self.timer.start(400)
 
-
-
-    #def closeEvent(self,event):
+    # def closeEvent(self,event):
     #    super(MessagePopup, self).closeEvent(event)
 
     def hide(self):
-        if (self._popupOpacity == 0):
+        if self._popupOpacity == 0:
             super().hide()
             '''if len(self.hdr.filename) > 1:
                 try:
                     os.remove(os.path.join(CACHE_DIR, self.hdr.filename))
                 except:
                     pass'''
-            if (self.onPopupResult != None):
+            if self.onPopupResult is not None:
                 self.onPopupResult(self)
             super().close()
 
     def setPopupText(self, text):
-       self.ui.label.setText(text)
+        self.ui.label.setText(text)
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing);
+        painter.setRenderHint(QPainter.Antialiasing)
         roundedRect = QRect()
-        roundedRect.setX(self.rect().x() + 5);
-        roundedRect.setY(self.rect().y() + 5);
-        roundedRect.setWidth(self.rect().width() - 10);
-        roundedRect.setHeight(self.rect().height() - 10);
-        painter.setBrush(QBrush(QColor(0,0,0,180)));
-        painter.setPen(Qt.NoPen);
-        painter.drawRoundedRect(roundedRect, 10, 10);
+        roundedRect.setX(self.rect().x() + 5)
+        roundedRect.setY(self.rect().y() + 5)
+        roundedRect.setWidth(self.rect().width() - 10)
+        roundedRect.setHeight(self.rect().height() - 10)
+        painter.setBrush(QBrush(QColor(0, 0, 0, 180)))
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(roundedRect, 10, 10)
 
     def show(self):
-        self.setWindowOpacity(0.0) # Set the transparency to zero
-        self.animation.setDuration(150) # Configuring the duration of the animation
-        self.animation.setStartValue(0.0) # The start value is 0 (fully transparent widget)
+        self.setWindowOpacity(0.0)  # Set the transparency to zero
+        self.animation.setDuration(150)  # Configuring the duration of the animation
+        self.animation.setStartValue(0.0)  # The start value is 0 (fully transparent widget)
         self.animation.setEndValue(1.0)  # End - completely opaque widget
         g = QApplication.desktop().availableGeometry()
         self.setGeometry(g.width() - 36 - self.width() + g.x(),
-            g.height() - 36 - self.height() + g.y(),  self.width(), self.height())
+                         g.height() - 36 - self.height() + g.y(), self.width(), self.height())
         super().show()
-        self.animation.start();
-        self.timer.start(30000);
+        self.animation.start()
+        self.timer.start(30000)
 
     def hideAnimation(self):
         self.timer.stop()
-        self.animation.setDuration(1000);
-        self.animation.setStartValue(1.0);
-        self.animation.setEndValue(0.0);
-        self.animation.start();
+        self.animation.setDuration(1000)
+        self.animation.setStartValue(1.0)
+        self.animation.setEndValue(0.0)
+        self.animation.start()
 
     def doCancel(self):
         self.popupResult = 2

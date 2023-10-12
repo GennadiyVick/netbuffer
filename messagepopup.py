@@ -3,10 +3,11 @@ from PyQt5.QtCore import Qt, pyqtProperty, QPropertyAnimation, QSize, QRect, QTi
 from PyQt5.QtGui import QPainter, QBrush, QColor
 from PyQt5.QtWidgets import QApplication
 
+
 class MessagePopup(QtWidgets.QWidget):
     @pyqtProperty(float)
     def popupOpacity(self):
-        return self._popupOpacity;
+        return self._popupOpacity
 
     @popupOpacity.setter
     def popupOpacity(self, opacity):
@@ -43,8 +44,8 @@ class MessagePopup(QtWidgets.QWidget):
         self.label.setText(msg)
         self.horizontalLayout.addWidget(self.label)
         self.setWindowTitle("Message")
-        #QtCore.QMetaObject.connectSlotsByName(self)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool |  Qt.WindowStaysOnTopHint)
+        # QtCore.QMetaObject.connectSlotsByName(self)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
 
@@ -52,32 +53,32 @@ class MessagePopup(QtWidgets.QWidget):
         self.animation.setTargetObject(self)
         self.animation.setPropertyName(b'popupOpacity')
         self.animation.finished.connect(self.hide)
-        #self.animation = QPropertyAnimation(self, b'popupOpacity')
-        #self.animation = QPropertyAnimation(self, b'windowOpacity')
-        #self.animation = QPropertyAnimation(self.fadeEffect, b'opacity')
-        #self.animation.setTargetObject(self.fadeEffect)
+        # self.animation = QPropertyAnimation(self, b'popupOpacity')
+        # self.animation = QPropertyAnimation(self, b'windowOpacity')
+        # self.animation = QPropertyAnimation(self.fadeEffect, b'opacity')
+        # self.animation.setTargetObject(self.fadeEffect)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.hideAnimation)
-        #self.anitimer = QTimer()
-        #self.anitimer.setInterval(60)
-        #self.anitimer.timeout.connect(self.on_anitimer)
-        #self.curopacity = 0.1
-        #self.ani_showing = True
-        #self.timer.start(4000)
+        # self.anitimer = QTimer()
+        # self.anitimer.setInterval(60)
+        # self.anitimer.timeout.connect(self.on_anitimer)
+        # self.curopacity = 0.1
+        # self.ani_showing = True
+        # self.timer.start(4000)
 
     def hide(self):
         if (self._popupOpacity == 0):
             super().close()
 
     def show(self):
-        self.setWindowOpacity(0.0) # Set the transparency to zero
-        self.animation.setDuration(150) # Configuring the duration of the animation
-        self.animation.setStartValue(0.0) # The start value is 0 (fully transparent widget)
+        self.setWindowOpacity(0.0)  # Set the transparency to zero
+        self.animation.setDuration(150)  # Configuring the duration of the animation
+        self.animation.setStartValue(0.0)  # The start value is 0 (fully transparent widget)
         self.animation.setEndValue(1.0)  # End - completely opaque widget
         g = QApplication.desktop().availableGeometry()
         self.setGeometry(g.width() - 36 - self.width() + g.x(),
-            g.height() - 36 - self.height() + g.y(),  self.width(), self.height())
+                         g.height() - 36 - self.height() + g.y(), self.width(), self.height())
         super().show()
         self.animation.start();
         self.timer.start(5000);
@@ -99,21 +100,19 @@ class MessagePopup(QtWidgets.QWidget):
 
     def hideAnimation(self):
         self.timer.stop()
-        self.animation.setDuration(600);
-        self.animation.setStartValue(1.0);
-        self.animation.setEndValue(0.0);
-        self.animation.start();
-
+        self.animation.setDuration(600)
+        self.animation.setStartValue(1.0)
+        self.animation.setEndValue(0.0)
+        self.animation.start()
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing);
+        painter.setRenderHint(QPainter.Antialiasing)
         roundedRect = QRect()
-        roundedRect.setX(self.rect().x() + 5);
-        roundedRect.setY(self.rect().y() + 5);
-        roundedRect.setWidth(self.rect().width() - 10);
-        roundedRect.setHeight(self.rect().height() - 10);
-        painter.setBrush(QBrush(QColor(0,0,0,180)));
-        painter.setPen(Qt.NoPen);
-        painter.drawRoundedRect(roundedRect, 10, 10);
-
+        roundedRect.setX(self.rect().x() + 5)
+        roundedRect.setY(self.rect().y() + 5)
+        roundedRect.setWidth(self.rect().width() - 10)
+        roundedRect.setHeight(self.rect().height() - 10)
+        painter.setBrush(QBrush(QColor(0, 0, 0, 180)))
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(roundedRect, 10, 10)
